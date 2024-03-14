@@ -1,5 +1,6 @@
 node_modules
 .env
+/generated-images
 
 # Hardhat files
 /cache

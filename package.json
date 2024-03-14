@@ -7,17 +7,24 @@
     "test-script": "npx hardhat run scripts/test.ts --network localhost",
     "console:local": "npx hardhat console --network localhost",
     "coverage": "set INC_GAS_LIMIT=true&& npx hardhat coverage",
-    "test": "npx hardhat test --network localhost"
+    "test": "npx hardhat test --network localhost",
+    "generate:nft": "ts-node scripts/generateNFT.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@types/merge-images": "^1.2.4",
     "dotenv": "^16.4.5",
     "hardhat": "^2.20.1",
     "hardhat-gas-reporter": "^1.0.10",
     "solidity-coverage": "^0.8.10"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.1"
+    "@openzeppelin/contracts": "^5.0.1",
+    "canvas": "^2.11.2",
+    "merge-images": "^2.0.0",
+    "node-canvas": "^2.9.0",
+    "node-gyp": "^10.0.1",
+    "random-js": "^2.1.0"
   }
 }
