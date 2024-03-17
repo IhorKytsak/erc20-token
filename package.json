@@ -8,7 +8,9 @@
     "console:local": "npx hardhat console --network localhost",
     "coverage": "set INC_GAS_LIMIT=true&& npx hardhat coverage",
     "test": "npx hardhat test --network localhost",
-    "generate:nft": "ts-node scripts/generateNFT.ts"
+    "generate:nft": "ts-node scripts/generateNFT.ts",
+    "updateURL": "ts-node utils/update-json-url.ts",
+    "deploynft:sepolia": "npx hardhat run scripts/ERC721Token.deploy.ts --network sepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",

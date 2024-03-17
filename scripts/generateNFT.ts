@@ -86,7 +86,7 @@ async function generateNFT(
 ) {
   let generated = new Set()
 
-  for (let tokenId = 0; tokenId < num; tokenId++) {
+  for (let tokenId = 1; tokenId < num; tokenId++) {
     console.log(`Generating NFT #${tokenId} ...`)
     let selection = randomlySelectedLayers(layersPath, content.layers)
     const traits = JSON.stringify(selection.selectedTraits)
@@ -99,7 +99,7 @@ async function generateNFT(
       generated.add(traits)
       await margeLayersAndSave(
         selection.images,
-        path.join(outputPath, `${tokenId}.png`)
+        path.join(outputPath, 'images', `${tokenId}.png`)
       )
 
       let metadata = generateMetadata(
@@ -108,12 +108,12 @@ async function generateNFT(
         selection.selectedTraits
       )
       fs.writeFileSync(
-        path.join(outputPath, `${tokenId}`),
+        path.join(outputPath, 'json', `${tokenId}.json`),
         JSON.stringify(metadata, null, 2)
       )
     }
   }
 }
 
-const outputPath = path.join(process.cwd(), 'generated-images')
-generateNFT(5, layersPath, outputPath)
+const outputPath = path.join(process.cwd(), 'build')
+generateNFT(100, layersPath, outputPath)

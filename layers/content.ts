@@ -2,7 +2,6 @@ export const content = {
   metadataTemplate: (tokenId: number, attributes: any) => ({
     name: `NFT #${tokenId}`,
     description: `This is a description of the NFT #${tokenId}`,
-    // image: `https://ipfs.io/ipfs/QmdkW174m8zE31gV8t2zN5K9j71f7y6111234567890?filename=nft-${tokenId}.png`,
     image: `imageURL`,
     attributes: attributes,
   }),
