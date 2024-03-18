@@ -14,7 +14,9 @@ describe('ERC20Token', () => {
     const TokenFactory = await ethers.getContractFactory('ERC20Token')
     const token = await TokenFactory.deploy()
 
-    return { token, cap, amount, owner, adr1, adr2 }
+    const tokenCost = await token.cost()
+
+    return { token, cap, amount, tokenCost, owner, adr1, adr2 }
   }
 
   describe('Deployment', function () {
@@ -46,38 +48,52 @@ describe('ERC20Token', () => {
 
   describe('Buy Token', function () {
     it('Should allow users to buy tokens with ETH', async function () {
-      const { token, owner, adr1 } = await loadFixture(deployTokenFixture)
+      const { token, owner, tokenCost, adr1 } = await loadFixture(
+        deployTokenFixture
+      )
 
-      const ethAmount = ethers.parseEther('1') // 10 TT for 1 ETH
+      const ethAmount = ethers.parseEther('1')
+      const tokenAmount = ethers.parseUnits(
+        (ethAmount / tokenCost).toString(),
+        'ether'
+      )
 
       expect(
         await token.connect(adr1).buyToken({ value: ethAmount })
-      ).to.changeTokenBalances(token, [owner, adr1], [-10, 10])
-
-      expect(await token.balanceOf(adr1.address)).to.equal(
-        ethers.parseEther('10')
+      ).to.changeTokenBalances(
+        token,
+        [owner, adr1],
+        [-tokenAmount, tokenAmount]
       )
+
+      expect(await token.balanceOf(adr1.address)).to.equal(tokenAmount)
       expect(await ethers.provider.getBalance(token.target)).to.equal(
         ethers.parseEther('1')
       )
     })
 
     it('Should buy tokens when receive called', async function () {
-      const { token, adr1 } = await loadFixture(deployTokenFixture)
+      const { token, tokenCost, adr1 } = await loadFixture(deployTokenFixture)
 
       const ethAmount = ethers.parseEther('1')
+      const tokenAmount = ethers.parseUnits(
+        (ethAmount / tokenCost).toString(),
+        'ether'
+      )
 
       await adr1.sendTransaction({ to: token.target, value: ethAmount })
 
-      expect(await token.balanceOf(adr1.address)).to.equal(
-        ethers.parseEther('10')
-      )
+      expect(await token.balanceOf(adr1.address)).to.equal(tokenAmount)
     })
 
     it('Should buy tokens when fallback called', async function () {
-      const { token, adr1 } = await loadFixture(deployTokenFixture)
+      const { token, tokenCost, adr1 } = await loadFixture(deployTokenFixture)
 
       const ethAmount = ethers.parseEther('1')
+      const tokenAmount = ethers.parseUnits(
+        (ethAmount / tokenCost).toString(),
+        'ether'
+      )
 
       await adr1.sendTransaction({
         to: token.target,
@@ -85,16 +101,14 @@ describe('ERC20Token', () => {
         data: '0x00',
       })
 
-      expect(await token.balanceOf(adr1.address)).to.equal(
-        ethers.parseEther('10')
-      )
+      expect(await token.balanceOf(adr1.address)).to.equal(tokenAmount)
     })
 
     it('Should revert if no ETH is sent', async function () {
       const { token, adr1 } = await loadFixture(deployTokenFixture)
 
       await expect(token.connect(adr1).buyToken()).to.be.rejectedWith(
-        'Send ETH to buy some tokens'
+        'Not enough ETH to buy tokens'
       )
     })
 
@@ -219,6 +233,56 @@ describe('ERC20Token', () => {
           .connect(adr1)
           .transferFrom(owner.address, adr2.address, transferAmount)
       ).to.be.revertedWithCustomError(token, 'ERC20InsufficientAllowance')
+    })
+  })
+
+  describe('Withdraw', function () {
+    it('Should allow the owner to withdraw ETH from the contract', async function () {
+      const { token, owner, adr1 } = await loadFixture(deployTokenFixture)
+
+      const initialOwnerBalance = await ethers.provider.getBalance(
+        owner.address
+      )
+      const ethAmount = ethers.parseEther('1')
+
+      await token.connect(adr1).buyToken({ value: ethAmount })
+      await token.withdraw()
+
+      const finalContractBalance = await ethers.provider.getBalance(
+        token.target
+      )
+      const finalOwnerBalance = await ethers.provider.getBalance(owner.address)
+
+      expect(finalContractBalance).to.equal(0)
+      expect(finalOwnerBalance).to.be.gt(initialOwnerBalance)
+    })
+
+    it('Should revert if a non-owner tries to withdraw ETH', async function () {
+      const { token, adr1 } = await loadFixture(deployTokenFixture)
+
+      await expect(token.connect(adr1).withdraw()).to.be.revertedWith(
+        'Invalid Owner'
+      )
+    })
+  })
+
+  describe('Set Cost', function () {
+    it('Should allow the owner to set the cost of the token', async function () {
+      const { token, owner } = await loadFixture(deployTokenFixture)
+
+      const newCost = ethers.parseEther('0.02')
+      await token.setCost(newCost)
+
+      expect(await token.cost()).to.equal(newCost)
+    })
+
+    it('Should revert if a non-owner tries to set the cost', async function () {
+      const { token, adr1 } = await loadFixture(deployTokenFixture)
+
+      const newCost = ethers.parseEther('0.02')
+      await expect(token.connect(adr1).setCost(newCost)).to.be.revertedWith(
+        'Invalid Owner'
+      )
     })
   })
 })

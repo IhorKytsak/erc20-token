@@ -6,24 +6,21 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
 contract ERC20Token is ERC20Capped {
-    address public immutable owner;
-    uint256 private constant TOKEN_MULTIPLIER = 10; //1 eather = 10 TT
+    address payable public immutable owner;
+    uint256 public cost = 0.01 ether; //1 to 100
 
-    constructor() ERC20("TestToken", "TT") ERC20Capped(1500 * 10**18) {
-        owner = msg.sender;
-        _mint(owner, 1000 * 10**18);
+    constructor() ERC20("TestToken", "TT") ERC20Capped(1500 * 10 ** 18) {
+        owner = payable(msg.sender);
+        _mint(owner, 1000 * 10 ** 18);
     }
 
     function buyToken() public payable returns (bool) {
-        require(msg.value > 0, "Send ETH to buy some tokens");
+        require(msg.value > 0, "Not enough ETH to buy tokens");
 
-        uint256 amountToBuy = msg.value * TOKEN_MULTIPLIER;
+        uint256 amountToBuy = msg.value * (1 ether / cost);
         uint256 ownerBalance = balanceOf(owner);
 
-        require(
-            ownerBalance >= amountToBuy,
-            "Contract has not enough tokens"
-        );
+        require(ownerBalance >= amountToBuy, "Contract has not enough tokens");
 
         _transfer(owner, msg.sender, amountToBuy);
 
@@ -31,29 +28,27 @@ contract ERC20Token is ERC20Capped {
     }
 
     function mint(uint256 amount) external onlyOwner returns (bool) {
-        _mint(owner, amount * 10**18);
+        _mint(owner, amount * 10 ** 18);
         return true;
     }
 
     function burn(uint256 amount) external onlyOwner returns (bool) {
-        _burn(owner, amount * 10**18);
+        _burn(owner, amount * 10 ** 18);
         return true;
     }
 
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
 
-    function approve(address spender, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 amount
+    ) public override returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -70,6 +65,17 @@ contract ERC20Token is ERC20Capped {
         return true;
     }
 
+    function setCost(uint256 _newCost) public onlyOwner {
+        cost = _newCost;
+    }
+
+    function withdraw() public payable onlyOwner {
+        (bool result, ) = payable(owner).call{value: address(this).balance}(
+            ""
+        );
+        require(result, "Withdraw failed");
+    }
+
     receive() external payable {
         buyToken();
     }
@@ -83,4 +89,3 @@ contract ERC20Token is ERC20Capped {
         _;
     }
 }
-

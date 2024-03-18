@@ -11,12 +11,12 @@ async function main() {
     owner
   )
 
-  // const ownerBallance = await ERC20Token.balanceOf(owner)
+  const ownerBallance = await ERC20Token.balanceOf(owner)
   const totalSupply = await ERC20Token.totalSupply()
   const cap = await ERC20Token.cap()
 
   // console.log('Owner:', owner)
-  // console.log('Owner Ballance:', ownerBallance.toString())
+  console.log('Owner Ballance:', ownerBallance.toString())
   console.log('TotalSupply:', totalSupply.toString())
   console.log('cap:', cap.toString())
 
@@ -28,7 +28,7 @@ async function main() {
     console.log('Minting failed, InvalidOwner')
   }
 
-  const balanceAfterMint = await ERC20Token.balanceOf(acc2)
+  const balanceAfterMint = await ERC20Token.balanceOf(owner)
 
   console.log('balance after mint 50 TT:', balanceAfterMint.toString())
 
@@ -39,8 +39,8 @@ async function main() {
   } catch (error) {
     console.log('Burning failed, InvalidOwner')
   }
- 
-  const balanceAfterBurn = await ERC20Token.balanceOf(acc2)
+
+  const balanceAfterBurn = await ERC20Token.balanceOf(owner)
 
   console.log('balance after burn 50 TT:', balanceAfterBurn.toString())
 }
