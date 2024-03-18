@@ -7,8 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
 contract ERC20Token is ERC20Capped {
     address payable public immutable owner;
-    uint256 public cost = 0.01 ether; //1 to 100
-
+    uint256 public tokensPerEth = 100;
     constructor() ERC20("TestToken", "TT") ERC20Capped(1500 * 10 ** 18) {
         owner = payable(msg.sender);
         _mint(owner, 1000 * 10 ** 18);
@@ -17,12 +16,12 @@ contract ERC20Token is ERC20Capped {
     function buyToken() public payable returns (bool) {
         require(msg.value > 0, "Not enough ETH to buy tokens");
 
-        uint256 amountToBuy = msg.value * (1 ether / cost);
+        uint256 amountToBuy = msg.value * tokensPerEth;
         uint256 ownerBalance = balanceOf(owner);
 
         require(ownerBalance >= amountToBuy, "Contract has not enough tokens");
 
-        _transfer(owner, msg.sender, amountToBuy);
+        _transfer(owner, msg.sender, amountToBuy );
 
         return true;
     }
@@ -41,7 +40,7 @@ contract ERC20Token is ERC20Capped {
         address recipient,
         uint256 amount
     ) public override returns (bool) {
-        _transfer(msg.sender, recipient, amount);
+        _transfer(msg.sender, recipient, amount * 10 ** 18);
         return true;
     }
 
@@ -49,7 +48,7 @@ contract ERC20Token is ERC20Capped {
         address spender,
         uint256 amount
     ) public override returns (bool) {
-        _approve(msg.sender, spender, amount);
+        _approve(msg.sender, spender, amount * 10 ** 18);
         return true;
     }
 
@@ -60,19 +59,13 @@ contract ERC20Token is ERC20Capped {
     ) public override returns (bool) {
         address spender = msg.sender;
 
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
+        _spendAllowance(from, spender, amount * 10 ** 18);
+        _transfer(from, to, amount * 10 ** 18);
         return true;
     }
 
-    function setCost(uint256 _newCost) public onlyOwner {
-        cost = _newCost;
-    }
-
     function withdraw() public payable onlyOwner {
-        (bool result, ) = payable(owner).call{value: address(this).balance}(
-            ""
-        );
+        (bool result, ) = payable(owner).call{value: address(this).balance}("");
         require(result, "Withdraw failed");
     }
 
