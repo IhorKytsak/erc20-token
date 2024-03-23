@@ -2,15 +2,20 @@
   "scripts": {
     "node": "npx hardhat node",
     "compile": "npx hardhat compile",
-    "deploy:local": "npx hardhat run scripts/deploy.ts --network localhost",
-    "deploy:sepolia": "npx hardhat run scripts/deploy.ts --network sepolia",
-    "test-script": "npx hardhat run scripts/test.ts --network localhost",
+    "deployToken:l": "npx hardhat run scripts/deployERC20.ts --network localhost",
+    "deployToken:s": "npx hardhat run scripts/deployERC20.ts --network sepolia",
+    "deployNft:s": "npx hardhat run scripts/deployERC721.ts --network sepolia",
+    "deployNft:l": "npx hardhat run scripts/deployERC721.ts --network localhost",
+    "deployMarketplace:s": "npx hardhat run scripts/deployMarketplace.ts --network sepolia",
+    "deployMarketplace:l": "npx hardhat run scripts/deployMarketplace.ts --network localhost",
+    "test-script:erc20": "npx hardhat run scripts/testERC20.ts --network localhost",
+    "test-script:nft": "npx hardhat run scripts/testNft.ts --network localhost",
+    "test-script:marketplace": "npx hardhat run scripts/testMarketplace.ts --network localhost",
     "console:local": "npx hardhat console --network localhost",
     "coverage": "set INC_GAS_LIMIT=true&& npx hardhat coverage",
     "test": "npx hardhat test --network localhost",
     "generate:nft": "ts-node scripts/generateNFT.ts",
-    "updateURL": "ts-node utils/update-json-url.ts",
-    "deploynft:sepolia": "npx hardhat run scripts/ERC721Token.deploy.ts --network sepolia"
+    "updateURL": "ts-node utils/update-json-url.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",

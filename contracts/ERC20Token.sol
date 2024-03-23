@@ -27,12 +27,12 @@ contract ERC20Token is ERC20Capped {
     }
 
     function mint(uint256 amount) external onlyOwner returns (bool) {
-        _mint(owner, amount * 10 ** 18);
+        _mint(owner, amount);
         return true;
     }
 
     function burn(uint256 amount) external onlyOwner returns (bool) {
-        _burn(owner, amount * 10 ** 18);
+        _burn(owner, amount);
         return true;
     }
 
@@ -40,7 +40,7 @@ contract ERC20Token is ERC20Capped {
         address recipient,
         uint256 amount
     ) public override returns (bool) {
-        _transfer(msg.sender, recipient, amount * 10 ** 18);
+        _transfer(msg.sender, recipient, amount);
         return true;
     }
 
@@ -48,7 +48,7 @@ contract ERC20Token is ERC20Capped {
         address spender,
         uint256 amount
     ) public override returns (bool) {
-        _approve(msg.sender, spender, amount * 10 ** 18);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -59,8 +59,8 @@ contract ERC20Token is ERC20Capped {
     ) public override returns (bool) {
         address spender = msg.sender;
 
-        _spendAllowance(from, spender, amount * 10 ** 18);
-        _transfer(from, to, amount * 10 ** 18);
+        _spendAllowance(from, spender, amount);
+        _transfer(from, to, amount);
         return true;
     }
 

@@ -111,14 +111,14 @@ describe('ERC20Token', () => {
 
   describe('Minting', function () {
     it('Should allow the owner to mint new tokens', async function () {
-      const { token, owner, decimals } = await loadFixture(deployTokenFixture)
+      const { token, owner } = await loadFixture(deployTokenFixture)
 
-      const mintAmount = 50
+      const mintAmount = ethers.parseEther('1')
       const initialOwnerBalance = await token.balanceOf(owner.address)
       await token.mint(mintAmount)
 
       expect(await token.balanceOf(owner.address)).to.equal(
-        initialOwnerBalance + ethers.parseUnits(mintAmount.toString(), decimals)
+        initialOwnerBalance + mintAmount
       )
     })
 
@@ -135,15 +135,15 @@ describe('ERC20Token', () => {
 
   describe('Burning', function () {
     it('Should allow the owner to burn tokens', async function () {
-      const { token, owner, decimals } = await loadFixture(deployTokenFixture)
+      const { token, owner } = await loadFixture(deployTokenFixture)
 
-      const burnAmount = 50
+      const burnAmount = ethers.parseEther('1')
 
       const initialOwnerBalance = await token.balanceOf(owner.address)
       await token.burn(burnAmount)
 
       expect(await token.balanceOf(owner.address)).to.equal(
-        initialOwnerBalance - ethers.parseUnits(burnAmount.toString(), decimals)
+        initialOwnerBalance - burnAmount
       )
     })
 
@@ -171,21 +171,16 @@ describe('ERC20Token', () => {
 
   describe('Token Transfer', function () {
     it('Should transfer tokens between accounts', async function () {
-      const { token, owner, decimals, adr1 } = await loadFixture(
-        deployTokenFixture
-      )
+      const { token, owner, adr1 } = await loadFixture(deployTokenFixture)
 
-      const transferAmount = 10
+      const transferAmount = ethers.parseEther('1')
 
       await expect(
         token.transfer(adr1.address, transferAmount)
       ).to.changeTokenBalances(
         token,
         [owner, adr1],
-        [
-          -ethers.parseUnits(transferAmount.toString(), decimals),
-          ethers.parseUnits(transferAmount.toString(), decimals),
-        ]
+        [-transferAmount, transferAmount]
       )
     })
 
@@ -201,20 +196,16 @@ describe('ERC20Token', () => {
     })
 
     it('Should update allowance and transfer tokens from another account', async function () {
-      const { token, owner, decimals, adr1, adr2 } = await loadFixture(
-        deployTokenFixture
-      )
+      const { token, owner, adr1, adr2 } = await loadFixture(deployTokenFixture)
 
-      const transferAmount = 10
+      const transferAmount = ethers.parseEther('1')
       await token.approve(adr1.address, transferAmount)
       await token
         .connect(adr1)
         .transferFrom(owner.address, adr2.address, transferAmount)
 
       expect(await token.allowance(owner.address, adr1.address)).to.equal(0)
-      expect(await token.balanceOf(adr2.address)).to.equal(
-        ethers.parseUnits(transferAmount.toString(), decimals)
-      )
+      expect(await token.balanceOf(adr2.address)).to.equal(transferAmount)
     })
 
     it('Should not allow transferring more than allowed amount', async function () {
